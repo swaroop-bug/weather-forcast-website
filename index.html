@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather Forecast</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Weather Forecast</h1>
+
+    <div class="searchbox">
+      <input type="text" id="cityInput" placeholder="Enter city name" />
+      <button onclick="fetchWeather()">Search</button>
+    </div>
+
+    <div id="result" class="weather-info"></div>
+
+    <script>
+      alert("Welcome to the Weather Forecast App! Please enter a city name to get the current weather information.");
+      const API_KEY = "de98a81233c34914bce122428251006"; 
+
+      async function fetchWeather() {
+        const city = document.getElementById("cityInput").value.trim();
+        if (!city) return showError("Please enter a city name.");
+
+        try {
+          const response = await fetch(
+            `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${encodeURIComponent(city)}`
+          );
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error.message || "City not found");
+          }
+
+          const data = await response.json();
+          displayWeather(data);
+        } catch (error) {
+          showError(error.message);
+        }
+      }
+
+      function displayWeather(data) {
+        const weatherHTML = `
+          <h2>${data.location.name}, ${data.location.country}</h2>
+          <div class="temp">${data.current.temp_c}°C</div>
+          <div class="description">${data.current.condition.text}</div>
+          <img class="weather-icon" src="${data.current.condition.icon}" alt="Weather icon">
+          <div class="details">
+            <div>Humidity: ${data.current.humidity}%</div>
+            <div>Wind: ${data.current.wind_kph} km/h</div>
+          </div>
+        `;
+        document.getElementById("result").innerHTML = weatherHTML;
+      }
+
+      function showError(message) {
+        document.getElementById("result").innerHTML = `<p class="error">${message}</p>`;
+      }
+    </script>
+  </div>
+</body>
+</html>
